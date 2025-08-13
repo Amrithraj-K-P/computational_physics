@@ -69,4 +69,30 @@ def list_sum(l):
         out+=l[i]
     return out
 
-#hi
+def lcg(x,a,m,c):
+    return (a*x + c)%m 
+
+def lcg_rng(n,a,m,c,x0):
+    out=[]
+    i=0
+    tempx=x0
+    while i<=n:
+        temp=lcg(tempx,a=a,m=m,c=c)
+        tempx=temp
+        out.append(tempx)
+        i+=1
+    return out
+
+def map(x,c):
+    return c*x*(1-x)
+
+def rng(c,length,x0):
+    out=[]
+    i=0
+    tempx=x0
+    while i<=length:
+        temp=map(tempx,c)
+        tempx=temp
+        out.append(tempx)
+        i+=1
+    return out
