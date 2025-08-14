@@ -72,7 +72,7 @@ def list_sum(l):
 def lcg(x,a,m,c):
     return (a*x + c)%m 
 
-def lcg_rng(n,a,m,c,x0):
+def lcg_rng(n,x0,a = 1103515245,c = 12345,m = 32768 ,range=None):
     out=[]
     i=0
     tempx=x0
@@ -81,7 +81,14 @@ def lcg_rng(n,a,m,c,x0):
         tempx=temp
         out.append(tempx)
         i+=1
-    return out
+    if range==None:
+        return out
+    else:
+        d=range[1]-range[0]
+        templ=[i/m for i in out]
+        out2=[range[0] + d*x for x in templ]
+        return out2
+        
 
 def map(x,c):
     return c*x*(1-x)
