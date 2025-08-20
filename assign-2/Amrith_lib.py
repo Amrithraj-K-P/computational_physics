@@ -103,3 +103,76 @@ def rng(c,length,x0):
         out.append(tempx)
         i+=1
     return out
+
+
+def augment(A,B):
+    out=[]
+    temp=[]
+    for i in range(len(A)):
+        temp=A[i].copy()
+        for j in range(len(B[i])):
+            temp.append(B[i][j]) 
+        out.append(temp)
+    return out
+
+# print(augment(A,B))
+
+def pivot(l,n):
+    return abs(l[n])
+
+def row_exchange(m,r1,r2): #r1<-->r2
+    r1_temp=m[r1]
+    r2_temp=m[r2]
+    m_temp=m.copy()
+    m_temp[r1]=r2_temp
+    m_temp[r2]=r1_temp
+    return m_temp
+
+def row_mult(m,r,c): # r-->c*r
+    m_temp=m.copy()
+    r_temp=[c*j for j in m[r]]
+    m_temp[r] = r_temp
+    return m_temp
+
+def row_mult_and_add(m,r1,r2,c): # r1-->r1 + c.r2
+    m_temp = m.copy()
+    r_temp = []
+    for i in range(len(m[r1])):
+        r_temp.append(m[r1][i] + c*m[r2][i])  
+    m_temp[r1] = r_temp
+    return m_temp
+
+def gauss_jordan(m1,m2):
+    aug = augment(m1,m2)
+    out=aug
+    # print(out)
+    for i in range(len(aug)):
+        piv_list=[]
+        for j in range(len(aug)):
+            piv_list.append(pivot(out[j],i))
+        piv_copy=piv_list.copy()
+        max_piv=max(piv_list)
+        max_index=piv_list.index(max_piv)
+        if max_index<i:
+            temp_max=max_piv
+            k=0
+            while k<=len(piv_list):
+                piv_copy.remove(temp_max)
+                temp_max=max(piv_copy)
+                if piv_list.index(temp_max)>=i:
+                    max_piv=temp_max
+                    max_index=piv_list.index(temp_max)
+                    break
+                k+=1
+
+        out=row_exchange(out,i,max_index)
+        # print(out)
+        out=row_mult(out,i,1/out[i][i])
+        # print(out)
+        for j in range(len(aug)):
+            if (j!=i and out[j][i]!=0):
+                out=row_mult_and_add(out,j,i,-out[j][i])
+                # print(out)
+    out2=[[out[l][-1]] for l in range(len(out))]
+
+    return out2
