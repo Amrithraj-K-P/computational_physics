@@ -176,3 +176,67 @@ def gauss_jordan(m1,m2):
     out2=[[out[l][-1]] for l in range(len(out))]
 
     return out2
+def L_U_decomposition(matrix): #Doolittle LU factorisation
+    m=[row.copy() for row in matrix]
+
+    for j in range(len(m)):
+        for i in range(1,j+1):
+            temp=0
+            for k in range(i):
+                temp += m[i][k]*m[k][j]
+            # print(temp)
+            
+            m[i][j] = m[i][j] - temp
+            # print(U)
+
+        for i in range(j+1,len(m)):
+            temp=0
+            for k in range(j):
+                temp += m[i][k]*m[k][j]
+            
+            m[i][j] = ( m[i][j] - temp )/m[j][j]
+            # print(L)
+    return m
+def L_U_Solve(A,B):
+    m = L_U_decomposition(A)
+    n=len(m)
+    U=make_zeros(n)
+    L=make_zeros(n)
+
+    for i in range(n):
+        for j in range(n):
+            if i > j:
+                L[i][j] = m[i][j]
+                U[i][j] = 0
+            elif i == j:
+                L[i][j] = 1
+                U[i][j] = m[i][j]
+            else:  # i < j
+                L[i][j] = 0
+                U[i][j] = m[i][j]
+
+
+    y=[]
+    x=[0]*len(B)
+    y.append(B[0][0])
+    for i in range(1,len(B)):
+        temp=0
+        for j in range(i):
+            temp+=L[i][j]*y[j]
+        y.append(B[i][0]-temp)
+    x[-1]=y[-1]/U[-1][-1]
+    for i in range(len(B)-1 , -1,-1):
+        temp=0
+        for j in range(i+1,len(B)):
+            temp+=U[i][j]*x[j]
+        temp2=y[i]-temp
+        x[i] = (temp2/U[i][i])
+    return x
+def make_zeros(n):
+    out=[]
+    for i in range(n):
+        row=[]
+        for j in range(n):
+            row.append(0)
+        out.append(row)
+    return out
