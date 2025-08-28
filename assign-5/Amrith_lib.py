@@ -121,8 +121,8 @@ def pivot(l,n):
     return abs(l[n])
 
 def row_exchange(m,r1,r2): #r1<-->r2
-    r1_temp=m[r1]
-    r2_temp=m[r2]
+    r1_temp=[j for j in m[r1]]
+    r2_temp=[j for j in m[r2]]
     m_temp=m.copy()
     m_temp[r1]=r2_temp
     m_temp[r2]=r1_temp
@@ -298,18 +298,22 @@ def D_L_U_sep(m):
     return D,L,U
 
 def dist(v1,v2):
-    out=[]
+    # out=[]
+    # for i in range(len(v1)):
+    #     out.append(abs(v1[i]-v2[i]))
+    # return max(out)
+    out=0
     for i in range(len(v1)):
-        out.append(abs(v1[i]-v2[i]))
-    return max(out)
+        out += (v1[i]-v2[i])**2
+    return np.sqrt(out)
 
-def jacobi_iter(m,b,guess,epsilon):
+def jacobi_sol(m,b,guess,epsilon):
     n=len(m)
     D,L,U= D_L_U_sep(m)
     count=0
     x_k=guess
     x_k2=[0]*n
-    while count<=1000:
+    while count<=100000:
         count+=1
         for i in range(n):
             temp=0
@@ -325,4 +329,50 @@ def jacobi_iter(m,b,guess,epsilon):
             x_k = x_k2.copy()
 
     print('does not converge')
-    return
+    return False, count
+
+def check_symmetry(m):
+    n=len(m)
+    for i in range(n):
+        for j in range(n):
+            if m[i][j]!=m[j][i]:
+                return False
+    return True
+
+def L_star_U_sep(m):
+    n=len(m)
+    L=make_zeros(n)
+    U=make_zeros(n)
+    for i in range(n):
+        L[i][i]=m[i][i]
+        for j in range(i+1,n):
+            L[j][i]=m[j][i]
+            U[i][j]=m[i][j]
+    return L,U
+
+def gauss_siedel_solve(a,b,guess,eps):
+    n=len(b)
+    x=guess
+    count=0
+    while count<=10000:
+        count+=1
+        dist=0
+        for i in range(n):
+            tempx=x[i]
+            temp=0
+            temp2=0
+            for j in range(i):
+                temp+=a[i][j]*x[j]
+            for j in range(i+1,n):
+                temp2+=a[i][j]*x[j]
+            
+            x[i] = (b[i][0] - temp - temp2)/a[i][i]
+            dist += (tempx-x[i])**2
+            # if dist<=np.abs(tempx-x[i]):
+            #     dist=np.abs(tempx-x[i])
+        if np.sqrt(dist)<=eps:
+            return x,count
+    print('does not converge')
+    return False,count
+
+           
