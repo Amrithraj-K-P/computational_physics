@@ -375,4 +375,43 @@ def gauss_siedel_solve(a,b,guess,eps):
     print('does not converge')
     return False,count
 
-           
+def bisection_root(f,bracket,accur):
+    a=bracket[0]
+    b=bracket[1]
+    if f(a)*f(b)>=0:
+        print('Wrong bracket input')
+        return
+    if abs(b-a)<=accur:
+        return (a+b)/2
+    else:
+        c=(a+b)/2
+        if f(a)*f(c)<=0:
+            return bisection_root(f,[a,c],accur)
+        else:
+            return bisection_root(f,[c,b],accur)
+
+def regula_falsi_root(f,bracket,accur):
+    a=bracket[0]
+    b=bracket[1]
+    if f(a)*f(b)>=0:
+        print('Wrong bracket input')
+        return
+    if abs(b-a)<=accur:
+        return (a+b)/2
+    else:
+        c=b-((b-a)*f(b)/(f(b)-f(a)))
+        if f(a)*f(c)<=0:
+            return regula_falsi_root(f,[a,c],accur)
+        else:
+            return regula_falsi_root(f,[c,b],accur)
+
+def find_bracket(f,bracket,beta):
+    a=bracket[0]
+    b=bracket[1]
+    if f(a)*f(b)<=0:
+        return [a,b]
+    else:
+        if abs(f(a))<=abs(f(b)):
+            return find_bracket(f,[a-beta*(b-a),b],beta)
+        else:
+            return find_bracket(f,[a,b+beta*(b-a)],beta)
