@@ -375,14 +375,19 @@ def gauss_siedel_solve(a,b,guess,eps):
     print('does not converge')
     return False,count
 
+
+bs_count=0
+
 def bisection_root(f,bracket,accur):
+    global bs_count
+    bs_count +=1
     a=bracket[0]
     b=bracket[1]
     if f(a)*f(b)>=0:
         print('Wrong bracket input')
         return
     if abs(b-a)<=accur:
-        return (a+b)/2
+        return (a+b)/2 , bs_count
     else:
         c=(a+b)/2
         if f(a)*f(c)<=0:
@@ -390,7 +395,11 @@ def bisection_root(f,bracket,accur):
         else:
             return bisection_root(f,[c,b],accur)
 
+
+rf_count=0
 def regula_falsi_root(f,bracket,accur):
+    global rf_count
+    rf_count+=1
     a=bracket[0]
     b=bracket[1]
     if f(a)*f(b)>=0:
@@ -399,9 +408,9 @@ def regula_falsi_root(f,bracket,accur):
         return
     c=b - (b-a)*f(b)/(f(b)-f(a))
     if abs(b-a)<=accur:
-        return (a+b)/2
+        return (a+b)/2 , rf_count
     if abs(f(c))<=accur:
-        return c
+        return c, rf_count  
     else:
         # c1=a-(b-a)*f(a)/(f(b)-f(a))
         
@@ -425,3 +434,23 @@ def find_bracket(f,bracket,beta):
             return find_bracket(f,[a-beta*(b-a),b],beta)
         else:
             return find_bracket(f,[a,b+beta*(b-a)],beta)
+
+def newton_raphson_root(f,df,accur,x0_guess):
+    count=0
+    x0=x0_guess
+    x1 = x0 - f(x0)/df(x0)
+    while abs(x1-x0)>=accur:
+        count+=1
+        x0=x1
+        x1 = x1 - f(x1)/df(x1)
+    return x1, count
+
+def fixed_pont_root(g,guess,accur):
+    count=0
+    x0=guess
+    x1=g(x0)
+    while abs(x1-x0)>accur:
+        count+=1
+        x0=x1
+        x1=g(x1)
+    return x1,count
