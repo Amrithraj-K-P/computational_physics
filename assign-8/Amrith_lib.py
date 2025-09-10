@@ -63,6 +63,27 @@ def vec_prod(v1,v2):
         i+=1
     return temp
 
+def matrix_vec_mult(m1,v):
+    n_rows_1=len(m1)
+    n_cols_1=len(m1[0])
+    n_v=len(v)
+    if n_cols_1 != n_v:
+        print("error in input")
+        return
+
+    j=0
+    out=[]
+    while j< n_cols_1:
+        v_j=0
+        k=0
+        while k<n_v:
+            v_j += m1[j][k]*v[k]
+            k+=1
+        out.append(v_j)
+        j+=1
+
+    return(out)
+
 def list_sum(l):
     out=0
     for i in range(len(l)):
@@ -141,6 +162,44 @@ def row_mult_and_add(m,r1,r2,c): # r1-->r1 + c.r2
         r_temp.append(m[r1][i] + c*m[r2][i])  
     m_temp[r1] = r_temp
     return m_temp
+
+def matrix_inverse(m1):
+    m2=make_zeros(len(m1))
+    for i in range(len(m1)):
+        m2[i][i] = 1
+    
+    aug = augment(m1,m2)
+    out=aug
+    # print(out)
+    for i in range(len(aug)):
+        piv_list=[]
+        for j in range(len(aug)):
+            piv_list.append(pivot(out[j],i))
+        piv_copy=piv_list.copy()
+        max_piv=max(piv_list)
+        max_index=piv_list.index(max_piv)
+        if max_index<i:
+            temp_max=max_piv
+            k=0
+            while k<=len(piv_list):
+                piv_copy.remove(temp_max)
+                temp_max=max(piv_copy)
+                if piv_list.index(temp_max)>=i:
+                    max_piv=temp_max
+                    max_index=piv_list.index(temp_max)
+                    break
+                k+=1
+
+        out=row_exchange(out,i,max_index)
+        # print(out)
+        out=row_mult(out,i,1/out[i][i])
+        # print(out)
+        for j in range(len(aug)):
+            if (j!=i and out[j][i]!=0):
+                out=row_mult_and_add(out,j,i,-out[j][i])
+                # print(out)
+    out2=[out[l][len(aug)::] for l in range(len(out))]
+    return out2
 
 def gauss_jordan(m1,m2):
     aug = augment(m1,m2)
@@ -454,3 +513,23 @@ def fixed_pont_root(g,guess,accur):
         x0=x1
         x1=g(x1)
     return x1,count
+
+def multivar_fixed_point_root(g,accur,guess):
+    count=0
+    x0=guess
+    x1=g(x0)
+    while dist(x0,x1)/dist(x1,[0]*len(x1))>accur:
+        count+=1
+        x0=x1
+        x1=g(x1)
+    return x1,count
+
+def multivar_newton_raphson_root(f,J,accur,x0_guess):
+    count=0
+    x0=x0_guess
+    x1 = [x0[i] - matrix_vec_mult(matrix_inverse(J(x0)),f(x0))[i]  for i in range(len(x0))]
+    while dist(x0,x1)/dist(x1,[0]*len(x1))>accur:
+        count+=1
+        x0=x1
+        x1 = [x1[i] - matrix_vec_mult(matrix_inverse(J(x1)),f(x1))[i] for i in range(len(x0))]
+    return x1, count
