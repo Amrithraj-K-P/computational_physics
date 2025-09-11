@@ -533,3 +533,79 @@ def multivar_newton_raphson_root(f,J,accur,x0_guess):
         x0=x1
         x1 = [x1[i] - matrix_vec_mult(matrix_inverse(J(x1)),f(x1))[i] for i in range(len(x0))]
     return x1, count
+
+def poly_diff(p):
+    n=len(p)
+    out=[]
+    for i in range(n):
+        out.append(p[i]*(n-i-1))
+
+    return out[:-1]
+
+def poly_val(p,x):
+    n=len(p)
+    out=0
+    for i in range(n):
+        out+= p[i]*(x**(n-i))
+    return out
+
+def poly_divide(p,d):
+    out=[p[0]]
+    for i in range(len(p)-1):
+        out.append(p[i+1]+out[-1]*d)
+
+    return out[:-1], out[-1]
+    
+
+def laguerre_step(p,guess,accur):
+    count=0
+    n=len(p)-1
+    x0=guess
+    
+    if abs(poly_val(p,x0))<=accur:
+        return x0,count
+
+    G=poly_val(poly_diff(p),x0)/poly_val(p,x0)
+    H=G**2 - poly_val(poly_diff(poly_diff(p)),x0)/poly_val(p,x0)
+    if G>=0:
+        a = n/(G + np.sqrt(abs((n-1)*(n*H - G**2))))
+    else:
+        a = n/(G - np.sqrt(abs((n-1)*(n*H - G**2))))
+    x1=x0-a
+
+    if abs(poly_val(p,x1))<=accur:
+        return x1,count
+
+
+    while abs(x1-x0)> accur or abs(poly_val(p,x1))>accur:
+        if abs(poly_val(p,x0))<=accur:
+            return x0,count
+        x0=x1
+        G=poly_val(poly_diff(p),x0)/poly_val(p,x0)
+        H=G**2 - poly_val(poly_diff(poly_diff(p)),x0)/poly_val(p,x0)
+        
+        if G>=0:
+            a = n/(G + np.sqrt(abs((n-1)*(n*H - G**2))))
+        else:
+            a = n/(G - np.sqrt(abs((n-1)*(n*H - G**2))))
+        x1=x0-a 
+        count+=1
+    return x1,count
+    
+
+def laguerre_root(p,guess,accur):
+    n=len(p)-1
+    p_temp=p.copy()
+    root_out=[]
+    rem_out=[]
+    count=0
+    for i in range(n):
+        x0=guess[i]
+        alpha_i,c = laguerre_step(p_temp,x0,accur)
+        root_out.append(float(alpha_i))
+        q,r= poly_divide(p_temp,alpha_i)
+        rem_out.append(float(r))
+        count+=c
+        p_temp = q
+
+    return root_out,rem_out
