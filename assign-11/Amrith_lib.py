@@ -609,3 +609,83 @@ def laguerre_root(p,guess,accur):
         p_temp = q
 
     return root_out,rem_out
+
+
+
+def midpoint_integ(f,lim,n): #lim : [a,b]
+    a,b=lim
+    h=abs((b-a)/n)
+    x_i=a #dummy variable
+    out=0
+    while x_i<=b:
+        out += f((x_i + x_i + h)/2)
+        x_i += h
+    return out*h
+
+
+def trapezoidal_integ(f,lim,n): #lim : [a,b]
+    a,b=lim
+    h=abs((b-a)/n)
+    out = f(a) + f(b)
+    x_i = a+h
+    while x_i<b: #summation is done over terms with weight = 2
+        out += 2*f(x_i)
+        x_i+=h
+    return out*h/2
+
+def midpoint_integ_accur(f,lim,err,d2f_max): #lim : [a,b]
+    a,b=lim
+    n=np.ceil(np.sqrt(abs(d2f_max) * (b-a)**3 / (24 * err))) #finding value of n
+    h=abs((b-a)/n)
+    x_i=a #dummy variable
+    out=0
+    while x_i<=b:
+        out += f((x_i + x_i + h)/2)
+        x_i += h
+    return float(out*h), float(n)
+
+
+def trapezoidal_integ_accur(f,lim,err,d2f_max): #lim : [a,b]
+    a,b=lim
+    n=np.ceil(np.sqrt(abs(d2f_max) * (b-a)**3 / (12 * err))) #finding value of n
+    h=abs((b-a)/n)
+    out = f(a) + f(b)
+    x_i = a+h
+    while x_i<b: #summation is done over terms with weight = 2
+        out += 2*f(x_i)
+        x_i+=h
+    return float(out*h/2), float(n)
+
+def simpson_integ_accur(f,lim,err,d4f_max):#lim : [a,b]
+    a,b=lim
+    n=np.ceil((abs(d4f_max) * (b-a)**5 / (180 * err))**0.25) #finding value of n
+    print(n)
+    if n%2!=0:
+        n+=1
+    h=abs((b-a)/n)
+    out = f(a) + f(b)
+    i=1
+    x_i = a+h
+    while x_i<b: #weight is 1 for a and b, 2 for odd and 4 for even
+        if i%2!=0:
+            out += 4*f(x_i)
+        else:
+            out += 2*f(x_i)
+        i+=1
+        x_i+=h
+    return float(out*h/3), float(n)
+
+def monte_carlo_integ(f,lim,n):
+    a,b=lim
+    ran=lcg_rng(n,x0=0.1,range=lim) #rng with seed=0.1 and range =[a,b]
+    i=0
+    sum_f=0 #sum f(xi)
+    sum_f2=0 #sum f(xi)^2
+    while i<n:
+        sum_f += f(ran[i])
+        sum_f2 += f(ran[i])**2
+        i+=1
+    integral=sum_f*(b-a)/n
+    sigma2 = sum_f2/n - (sum_f/n)**2
+    sigma=np.sqrt(sigma2)
+    return float(integral), float(sigma)
