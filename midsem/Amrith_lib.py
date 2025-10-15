@@ -502,7 +502,7 @@ def newton_raphson_root(f,df,accur,x0_guess):
         count+=1
         x0=x1
         x1 = x1 - f(x1)/df(x1)
-    return x1, count
+    return float(x1), count
 
 def fixed_pont_root(g,guess,accur):
     count=0
