@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.polynomial import legendre
 class mycomplex():
     def __init__(self,real,imag):
         self.r=real
@@ -675,6 +676,23 @@ def simpson_integ_accur(f,lim,err,d4f_max):#lim : [a,b]
         x_i+=h
     return float(out*h/3), float(n)
 
+def simpson_integ(f,lim,err,n):#lim : [a,b]
+    a,b=lim
+    if n%2!=0:
+        n+=1
+    h=abs((b-a)/n)
+    out = f(a) + f(b)
+    i=1
+    x_i = a+h
+    while x_i<b: #weight is 1 for a and b, 2 for odd and 4 for even
+        if i%2!=0:
+            out += 4*f(x_i)
+        else:
+            out += 2*f(x_i)
+        i+=1
+        x_i+=h
+    return float(out*h/3)
+
 def monte_carlo_integ(f,lim,n):
     a,b=lim
     ran=lcg_rng(n,x0=0.1,range=lim) #rng with seed=0.1 and range =[a,b]
@@ -689,3 +707,11 @@ def monte_carlo_integ(f,lim,n):
     sigma2 = sum_f2/n - (sum_f/n)**2
     sigma=np.sqrt(sigma2)
     return float(integral), float(sigma)
+
+def gaussian_quadrature_integ(f,limits,n):
+    a,b=limits[0],limits[1]
+    points, weights = legendre.leggauss(n) # points, weights = legendre.leggauss(degree)
+    out=0
+    for i in range(n):
+        out+=weights[i]*f(((b-a)/2)*points[i] + (b+a)/2) #for when the interval is not [-1,1]
+    return out*(b-a)/2
