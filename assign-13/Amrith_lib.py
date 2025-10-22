@@ -715,3 +715,40 @@ def gaussian_quadrature_integ(f,limits,n):
     for i in range(n):
         out+=weights[i]*f(((b-a)/2)*points[i] + (b+a)/2) #for when the interval is not [-1,1]
     return out*(b-a)/2
+
+def forward_euler_solve(f,init,t_range,step_size=0.1):
+    #  here f is taken as a vector, i.e, f=[f1,f2,...,fn]
+    #  initial condition is also taken as a vector, i.e, init=[y1_0,y2_0,...,yn_0]
+    # t_range = [t0,t_fin]
+    temp_sol=init
+    t_init,t_fin=t_range
+    temp_t=t_init
+    sol_out=[init]
+    t_out=[t_init]
+    while temp_t<=t_fin:
+        k_1 = [step_size*i for i in f(temp_sol,temp_t)] #finding k1
+        temp_sol=[temp_sol[i]+k_1[i] for i in range(len(temp_sol))] #updating solution for each time step
+        temp_t+=step_size
+        sol_out.append(temp_sol)
+        t_out.append(temp_t)
+    #sol_out=[[y1_0,y2_0,...,yn_0],...,[y1_tfin,y2_tfin,...,yn_tfin]]
+    return t_out, sol_out 
+
+def predictor_corrector_solve(f,init,t_range,step_size=0.1):
+    #  here f is taken as a vector, i.e, f=[f1,f2,...,fn]
+    #  initial condition is also taken as a vector, i.e, init=[y1_0,y2_0,...,yn_0]
+    # t_range = [t0,t_fin]
+    temp_sol=init
+    t_init,t_fin=t_range
+    temp_t=t_init
+    sol_out=[init]
+    t_out=[t_init]
+    while temp_t<=t_fin:
+        k_1 = [step_size*i for i in f(temp_sol,temp_t)]#finding k1
+        k_2 = [step_size*j for j in f(temp_sol+k_1,temp_t+step_size)]#finding k2
+        temp_sol = [temp_sol[i] + 0.5* (k_1[i] + k_2[i]) for i in range(len(k_1))]#updating solution for each time step
+        temp_t+=step_size
+        sol_out.append(temp_sol)
+        t_out.append(temp_t)
+    #sol_out=[[y1_0,y2_0,...,yn_0],...,[y1_tfin,y2_tfin,...,yn_tfin]]
+    return t_out, sol_out
