@@ -752,3 +752,28 @@ def predictor_corrector_solve(f,init,t_range,step_size=0.1):
         t_out.append(temp_t)
     #sol_out=[[y1_0,y2_0,...,yn_0],...,[y1_tfin,y2_tfin,...,yn_tfin]]
     return t_out, sol_out
+
+def vect_add(v1,v2): #addition of two vectors
+    return [v1[i] + v2[i] for i in range(len(v1))]
+def vect_scalar_mult(s,v): #scalar multiplication with a vector
+    return [s*i for i in v]
+def RK4_solve(f,init,t_range,step_size=0.1):
+    #  here f is taken as a vector, i.e, f=[f1,f2,...,fn]
+    #  initial condition is also taken as a vector, i.e, init=[y1_0,y2_0,...,yn_0]
+    # t_range = [t0,t_fin]
+    temp_sol=init
+    t_init,t_fin=t_range
+    temp_t=t_init
+    sol_out=[init]
+    t_out=[t_init]
+    while temp_t<=t_fin:
+        k_1 = vect_scalar_mult(step_size,f(temp_sol,temp_t))#finding k1
+        k_2 = vect_scalar_mult(step_size,f(vect_add(temp_sol,vect_scalar_mult(0.5,k_1)), temp_t + step_size*0.5))#finding k2
+        k_3 = vect_scalar_mult(step_size, f(vect_add(temp_sol,vect_scalar_mult(0.5,k_2)), temp_t + step_size*0.5))#finding k3
+        k_4 = vect_scalar_mult(step_size,f(vect_add(temp_sol,k_3), temp_t + step_size)) #finding k4
+        temp_sol = [temp_sol[i] + (k_1[i] + 2*k_2[i] + 2* k_3[i] + k_4[i])/6 for i in range(len(k_1))]#updating solution for each time step
+        temp_t+=step_size
+        sol_out.append(temp_sol)
+        t_out.append(temp_t)
+    #sol_out=[[y1_0,y2_0,...,yn_0],...,[y1_tfin,y2_tfin,...,yn_tfin]]
+    return t_out, sol_out
