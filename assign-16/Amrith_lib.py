@@ -777,3 +777,48 @@ def RK4_solve(f,init,t_range,step_size=0.1):
         t_out.append(temp_t)
     #sol_out=[[y1_0,y2_0,...,yn_0],...,[y1_tfin,y2_tfin,...,yn_tfin]]
     return t_out, sol_out
+
+def lagrange_interpolate(x,x_vals,y_vals):
+    n=len(x_vals)
+    out = 0
+    i=0
+    while i<n:
+        k=0
+        out2=1
+        while k<n:
+            if k==i:
+                k+=1
+            else:
+                out2 = out2 * (x - x_vals[k])/(x_vals[i] - x_vals[k])
+                k+=1
+        out += out2 * y_vals[i]
+        i+=1
+    return out
+
+def lsqfit(x_data,y_data,sigma=None):
+    n = len(x_data)
+    if sigma==None:
+        sigmas = [1]*n #choosing sigmas to be 1 by default
+    else:
+        sigmas = sigma
+
+    Sy = sum(y_data[i]/sigmas[i]**2 for i in range(n))
+    Sx = sum(x_data[i]/sigmas[i]**2 for i in range(n))
+    Sxy = sum(y_data[i]*x_data[i]/sigmas[i]**2 for i in range(n))
+    Sxx = sum(x_data[i]**2/sigmas[i]**2 for i in range(n))
+    Syy =  sum(y_data[i]**2/sigmas[i]**2 for i in range(n))
+    S = sum(1/sigmas[i]**2 for i in range(n))
+    Delta = S*Sxx - Sx**2
+
+    #slope and intercept
+    intercept = (Sxx * Sy - Sx * Sxy)/Delta
+    slope = (Sxy - Sx*Sy)/Delta
+
+    ## Error in slope and intercept
+    # sigmasqr_intercept = Sxx/Delta 
+    # sigmasqr_slope = S/Delta
+
+    #Pearson’s correlation coefficient
+    r_sqr = Sxy**2 / (Sxx * Syy)
+
+    return intercept,slope,r_sqr
