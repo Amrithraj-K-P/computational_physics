@@ -618,7 +618,7 @@ def midpoint_integ(f,lim,n): #lim : [a,b]
     h=abs((b-a)/n)
     x_i=a #dummy variable
     out=0
-    while x_i<=b:
+    while x_i<b:
         out += f((x_i + x_i + h)/2)
         x_i += h
     return out*h
@@ -726,7 +726,7 @@ def forward_euler_solve(f,init,t_range,step_size=0.1):
     sol_out=[init]
     t_out=[t_init]
     while temp_t<=t_fin:
-        k_1 = [step_size*i for i in f(temp_sol,temp_t)] #finding k1
+        k_1 = vect_scalar_mult(step_size,f(temp_sol,temp_t))#finding k1
         temp_sol=[temp_sol[i]+k_1[i] for i in range(len(temp_sol))] #updating solution for each time step
         temp_t+=step_size
         sol_out.append(temp_sol)
@@ -744,8 +744,8 @@ def predictor_corrector_solve(f,init,t_range,step_size=0.1):
     sol_out=[init]
     t_out=[t_init]
     while temp_t<=t_fin:
-        k_1 = [step_size*i for i in f(temp_sol,temp_t)]#finding k1
-        k_2 = [step_size*j for j in f(temp_sol+k_1,temp_t+step_size)]#finding k2
+        k_1 = vect_scalar_mult(step_size,f(temp_sol,temp_t))#finding k1
+        k_2 = vect_scalar_mult(step_size,f(vect_add(temp_sol,k_1), temp_t + step_size))
         temp_sol = [temp_sol[i] + 0.5* (k_1[i] + k_2[i]) for i in range(len(k_1))]#updating solution for each time step
         temp_t+=step_size
         sol_out.append(temp_sol)
